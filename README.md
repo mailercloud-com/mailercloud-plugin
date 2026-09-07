@@ -20,10 +20,18 @@ No changes to the Mailercloud server are required — the plugin only references
 
 ## Install
 
-In Claude Code, run:
+Run these in Claude Code **one at a time** (each is a separate slash command — enter the first,
+wait for it to finish, then enter the second). Do **not** paste both lines together.
+
+**1. Add the marketplace:**
 
 ```
 /plugin marketplace add https://github.com/mailercloud-com/mailercloud-plugin.git
+```
+
+**2. Install the plugin:**
+
+```
 /plugin install mailercloud@mailercloud
 ```
 
@@ -31,11 +39,7 @@ In Claude Code, run:
 > (`mailercloud-com/mailercloud-plugin`) makes Claude Code clone over SSH, which fails if you
 > don't have GitHub SSH keys configured. The HTTPS URL works for everyone.
 
-Then restart Claude Code if prompted, and try:
-
-```
-/mailercloud:campaign-audit
-```
+Then restart Claude Code if prompted, and try `/mailercloud:campaign-audit`.
 
 ## Requirements & authentication
 - A **Mailercloud account** (sign up at https://mailercloud.com).
