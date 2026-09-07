@@ -27,7 +27,7 @@ In Claude Code, run:
 /plugin install mailercloud@mailercloud
 ```
 
-> **Use the full `https://…​.git` URL above.** The GitHub shorthand
+> **Use the full `https://….git` URL above.** The GitHub shorthand
 > (`mailercloud-com/mailercloud-plugin`) makes Claude Code clone over SSH, which fails if you
 > don't have GitHub SSH keys configured. The HTTPS URL works for everyone.
 
