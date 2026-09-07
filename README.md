@@ -18,27 +18,44 @@ the box, not just the raw tools.
 
 No changes to the Mailercloud server are required — the plugin only references it.
 
-## Requirements
-- A Mailercloud account. On first tool use, Claude Code runs the OAuth flow (or accepts a
-  Mailercloud API key) to authorize.
+## Install
 
-## Try it locally
-From this repo's parent directory, add it as a local marketplace and install:
+In Claude Code, run:
 
+```
+/plugin marketplace add https://github.com/mailercloud-com/mailercloud-plugin.git
+/plugin install mailercloud@mailercloud
+```
+
+> **Use the full `https://…​.git` URL above.** The GitHub shorthand
+> (`mailercloud-com/mailercloud-plugin`) makes Claude Code clone over SSH, which fails if you
+> don't have GitHub SSH keys configured. The HTTPS URL works for everyone.
+
+Then restart Claude Code if prompted, and try:
+
+```
+/mailercloud:campaign-audit
+```
+
+## Requirements & authentication
+- A **Mailercloud account** (sign up at https://mailercloud.com).
+- The first time a Mailercloud tool runs, Claude Code connects the MCP server and prompts you
+  to **authorize** — sign in to Mailercloud (OAuth) or provide a Mailercloud API key. Until you
+  authorize, the tools will report that authentication is required; this is expected.
+
+## Verify it installed
+```
+/plugin list                     # should show: mailercloud@mailercloud
+```
+You should also see `/mailercloud:campaign-audit` and `/mailercloud:analyze-campaigns` in the
+slash-command list, and the `mailercloud` MCP server under your connected tools.
+
+## Local development
+To test changes without publishing, add the folder as a local marketplace:
 ```
 /plugin marketplace add ./mailercloud-plugin
 /plugin install mailercloud@mailercloud
 ```
-
-Then run `/mailercloud:campaign-audit` or ask the campaign-manager agent to review your sends.
-
-## Publish
-1. Push this folder to a public GitHub repo (e.g. `mailercloud-com/mailercloud-plugin`).
-2. Users install with:
-   ```
-   /plugin marketplace add mailercloud-com/mailercloud-plugin
-   /plugin install mailercloud@mailercloud
-   ```
 
 ## Structure
 ```
