@@ -1,0 +1,15 @@
+{
+  "name": "mailercloud",
+  "description": "Official Mailercloud plugin for Claude Code — email marketing tools plus best-practice commands, a deliverability skill, and a campaign-manager agent.",
+  "owner": {
+    "name": "Mailercloud",
+    "url": "https://mailercloud.com"
+  },
+  "plugins": [
+    {
+      "name": "mailercloud",
+      "source": "./",
+      "description": "Mailercloud email marketing for Claude Code — campaigns, contacts, templates, sending, plus AI campaign analysis and deliverability best practices."
+    }
+  ]
+}

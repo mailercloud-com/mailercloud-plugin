@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mailercloud": {
+      "type": "http",
+      "url": "https://mcp.mailercloud.com/mcp"
+    }
+  }
+}

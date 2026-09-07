@@ -1,0 +1,11 @@
+{
+  "name": "mailercloud",
+  "version": "1.0.0",
+  "description": "Mailercloud email marketing for Claude Code — campaigns, contacts, templates, sending, plus AI campaign analysis and deliverability best practices.",
+  "author": {
+    "name": "Mailercloud",
+    "url": "https://mailercloud.com"
+  },
+  "homepage": "https://mailercloud.com",
+  "keywords": ["email", "marketing", "campaigns", "deliverability", "mailercloud"]
+}
