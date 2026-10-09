@@ -1,0 +1,11 @@
+{
+  "name": "mailercloud",
+  "version": "1.0.0",
+  "description": "Mailercloud email marketing: campaigns, contacts, templates, sending and analytics.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "mailercloud": {
+      "httpUrl": "https://mcp.mailercloud.com/mcp"
+    }
+  }
+}
