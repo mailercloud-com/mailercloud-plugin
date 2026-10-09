@@ -41,6 +41,14 @@ wait for it to finish, then enter the second). Do **not** paste both lines toget
 
 Then restart Claude Code if prompted, and try `/mailercloud:campaign-audit`.
 
+## Install in Gemini CLI
+
+```
+gemini extensions install https://github.com/mailercloud-com/mailercloud-plugin
+```
+
+Then run `/mcp` in Gemini CLI. mailercloud should be listed, and Gemini will ask you to sign in to Mailercloud the first time a tool runs.
+
 ## Requirements & authentication
 - A **Mailercloud account** (sign up at https://mailercloud.com).
 - The first time a Mailercloud tool runs, Claude Code connects the MCP server and prompts you
