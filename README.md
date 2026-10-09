@@ -49,6 +49,11 @@ gemini extensions install https://github.com/mailercloud-com/mailercloud-plugin
 
 Then run `/mcp` in Gemini CLI. mailercloud should be listed, and Gemini will ask you to sign in to Mailercloud the first time a tool runs.
 
+## Install in Cline and other MCP clients
+
+Mailercloud is a hosted MCP server at `https://mcp.mailercloud.com/mcp` (Streamable HTTP, OAuth sign-in).
+Step-by-step setup for Cline and other agents is in [llms-install.md](llms-install.md).
+
 ## Requirements & authentication
 - A **Mailercloud account** (sign up at https://mailercloud.com).
 - The first time a Mailercloud tool runs, Claude Code connects the MCP server and prompts you
