@@ -15,18 +15,34 @@ confirm with the user before any create/update/delete/send action.
   `campaign_health_dashboard`, `engagement_funnel`, `get_campaign_domain_report`,
   `get_inbox_tracking`, `get_account_overview`, `get_best_practices`.
 - **Audit before sending:** `audit_campaign_draft`.
-- **Write (confirm first):** `create_*`, `update_*`, `upsert_contact`, `batch_create_contacts`,
-  `schedule_campaign`, `send_test_email`, `send_transactional_email`, `toggle_webhook`.
+- **Write (dry_run first, confirm before acting):** `create_*`, `update_*`, `upsert_contact`,
+  `batch_create_contacts`, `add_lists_to_campaign`, `add_suppressions`, `toggle_webhook`.
+- **Send (two-step `confirm`):** `schedule_campaign`, `send_transactional_email`,
+  `send_personalized_email`; `send_test_email` to user-given addresses only.
+- **Guided workflows (MCP prompts):** `plan_campaign`, `audit_draft`, `monthly_review`,
+  `clean_my_list`.
+- **Can't do it?** Panel hand-off from the glossary, then `report_unsupported_task`.
 - **Destructive (double-confirm):** `delete_contact`, `delete_list`, `delete_webhook`.
 
+## Term map (read first)
+`references/glossary.md` maps every Mailercloud term a user might say (STO, staggered send,
+Inbox Tracker, exclusions, segments, double opt-in...) to one outcome: the **tool** to call, a
+**panel** hand-off with the exact path, an **add-on** with its price, or **not offered**. Look a
+term up there before improvising. Never try to drive the browser to finish something the tools
+cannot do: say it is not available through the connector, finish everything else, give the panel
+path, then call `report_unsupported_task` once.
+
 ## Core rules
-1. **Never send or schedule without explicit confirmation.** `schedule_campaign`,
-   `send_test_email`, and `send_transactional_email` reach real recipients. Show what will be
-   sent, to which list/how many recipients, and from which sender — then wait for a yes.
+1. **Sends are two-step, enforced by the server.** `schedule_campaign`, `send_transactional_email`
+   and `send_personalized_email` return a preview (recipients, sender, subject, send time) and send
+   nothing unless called again with `confirm: true`. Show the preview, wait for an explicit yes,
+   then confirm. `send_test_email` reaches real inboxes too: confirm the addresses first.
 2. **Always audit a draft before sending** (`audit_campaign_draft`) — see the audit checklist below.
-3. **Deletes are irreversible.** For `delete_*`, restate exactly what will be removed and require a
-   second confirmation. Prefer archiving/deactivating over deleting when possible.
-4. **Respect the authenticated account's scope.** The connector acts as the signed-in Mailercloud
+3. **Preview before any write.** Every write tool accepts `dry_run: true`, which validates and shows
+   what would change without changing it. Use it for imports, updates, suppressions and deletes.
+4. **Deletes are irreversible.** `delete_*` and tag removal need `confirm: true`; restate exactly
+   what will be removed and get a second yes. Prefer deactivating over deleting when possible.
+5. **Respect the authenticated account's scope.** The connector acts as the signed-in Mailercloud
    account; don't assume access to data outside it.
 
 ## Pre-send audit checklist

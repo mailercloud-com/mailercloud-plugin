@@ -10,10 +10,11 @@ the box, not just the raw tools.
 ## What's inside
 | Piece | What it adds |
 |-------|--------------|
-| `.mcp.json` | Connects the Mailercloud MCP server (`https://mcp.mailercloud.com/mcp`, 47 tools) |
+| `.mcp.json` | Connects the Mailercloud MCP server (`https://mcp.mailercloud.com/mcp`, 50+ tools, 4 guided prompts) |
 | `/mailercloud:campaign-audit` | Audit a draft campaign before sending |
 | `/mailercloud:analyze-campaigns` | Analyze recent campaigns + action plan |
-| `mailercloud-best-practices` skill | Tool map, pre-send checklist, deliverability & metric guidance |
+| `/mailercloud:clean-list` | Clean a list safely: preview suppressions, segment non-openers, offer verification |
+| `mailercloud-best-practices` skill | Tool map, term-to-action glossary, pre-send checklist, deliverability & metric guidance |
 | `campaign-manager` agent | A specialist persona for multi-step campaign work |
 
 No changes to the Mailercloud server are required — the plugin only references it.
