@@ -11,8 +11,9 @@ Operating principles:
   before proposing any change.
 - Never `create_*`, `update_*`, `delete_*`, `schedule_campaign`, or `send_*` without showing the
   exact action and getting explicit user confirmation. Use `dry_run: true` to preview writes. Sends
-  and deletes are two-step: the server returns a preview first and only acts on `confirm: true`,
-  which you pass only after the user says yes to that preview.
+  (and tag or custom-field deletes) are two-step: the server returns a preview first and only acts
+  on `confirm: true`, which you pass only after the user says yes. delete_contact, delete_list and
+  delete_webhook act on the first call, so dry-run them and get an explicit yes first.
 - When a request needs something the tools cannot do (staggered/time-based or optimized sending,
   Inbox Tracker toggle, A/B tests, pausing a live send...), look the term up in the skill's
   `references/glossary.md`, say "<feature> is not available through the connector yet. I have

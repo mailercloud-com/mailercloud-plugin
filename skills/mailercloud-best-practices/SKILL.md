@@ -22,7 +22,8 @@ confirm with the user before any create/update/delete/send action.
 - **Guided workflows (MCP prompts):** `plan_campaign`, `audit_draft`, `monthly_review`,
   `clean_my_list`.
 - **Can't do it?** Panel hand-off from the glossary, then `report_unsupported_task`.
-- **Destructive (double-confirm):** `delete_contact`, `delete_list`, `delete_webhook`.
+- **Destructive:** `delete_tag`, `delete_custom_field`, `remove_tag_from_contact` (server `confirm`);
+  `delete_contact`, `delete_list`, `delete_webhook` (no server confirm: dry-run and ask first).
 
 ## Term map (read first)
 `references/glossary.md` maps every Mailercloud term a user might say (STO, staggered send,
@@ -33,16 +34,23 @@ cannot do: say it is not available through the connector, finish everything else
 path, then call `report_unsupported_task` once.
 
 ## Core rules
-1. **Sends are two-step, enforced by the server.** `schedule_campaign`, `send_transactional_email`
-   and `send_personalized_email` return a preview (recipients, sender, subject, send time) and send
+1. **Sends are two-step, enforced by the server.** `schedule_campaign`, `send_transactional_email`,
+   `send_personalized_email`, `create_campaign` with `is_publish` or `scheduled_at`, and
+   `update_campaign` with `scheduled_at` return a preview (recipients, sender, subject, send time) and send
    nothing unless called again with `confirm: true`. Show the preview, wait for an explicit yes,
    then confirm. `send_test_email` reaches real inboxes too: confirm the addresses first.
 2. **Always audit a draft before sending** (`audit_campaign_draft`) — see the audit checklist below.
 3. **Preview before any write.** Every write tool accepts `dry_run: true`, which validates and shows
    what would change without changing it. Use it for imports, updates, suppressions and deletes.
-4. **Deletes are irreversible.** `delete_*` and tag removal need `confirm: true`; restate exactly
-   what will be removed and get a second yes. Prefer deactivating over deleting when possible.
-5. **Respect the authenticated account's scope.** The connector acts as the signed-in Mailercloud
+4. **Deletes are irreversible.** `delete_tag`, `delete_custom_field` and `remove_tag_from_contact`
+   require `confirm: true`. `delete_contact`, `delete_list` and `delete_webhook` act on the first
+   call, so dry-run them, restate exactly what will be removed and get an explicit yes before the
+   real call. Prefer deactivating over deleting when possible.
+5. **Two suppression lists.** `add_suppressions` manages the API Platform (Email API / SMTP)
+   list; it never stops Marketing Platform campaigns. To stop campaigns reaching an address,
+   use `update_contact` with `contact_type: unsubscribe` or `suppressed` (two-step: preview, then
+   `confirm: true`), or import it as Suppressed in the panel.
+6. **Respect the authenticated account's scope.** The connector acts as the signed-in Mailercloud
    account; don't assume access to data outside it.
 
 ## Pre-send audit checklist

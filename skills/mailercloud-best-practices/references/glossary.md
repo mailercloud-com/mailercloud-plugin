@@ -46,14 +46,14 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Email Verifier | Verifier, list cleaning | Separate product that scores addresses | WRAP | Verifier API (`Verify Emails`, bulk file endpoints); panel: platform switcher > Email Verifier | Add-on credits |
 | Platform switcher | Switch product | Top-of-sidebar toggle between the three products | PANEL | Sidebar top | All plans |
 | Dashboard | Home, KPIs | Open, click, unsubscribe rates, sent graph, recent campaigns | TOOL | `campaign_health_dashboard`, `get_account_overview` | All plans |
-| Account overview | Plan, usage, limits, quota | Current plan, contact and email usage | TOOL | `get_account_overview` | All plans |
+| Account overview | Plan, contacts used, limits | Current plan and contact counts. It does not report emails sent, API quota, add-ons or verifier credits | TOOL | `get_account_overview`; emails used, add-ons and credits: Settings > Billing & Usage | All plans |
 | MCP server | Connector, Claude connector, AI tools | This integration at `mcp.mailercloud.com/mcp` | INFO | Help: "Connect Mailercloud to AI assistants" | All plans |
 
 ## 2. Campaigns: create and content
 
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
-| Regular campaign | Normal campaign, newsletter, broadcast, blast | One email to chosen lists, segments and tags | TOOL | `create_campaign` (name, subject, list_ids, html or plain_text, preheader, sender, reply, segments, tag_ids, exclusions, frequency_cap, is_publish=false by default) | All plans |
+| Regular campaign | Normal campaign, newsletter, broadcast, blast | One email to chosen lists, segments and tags | TOOL | `create_campaign` (name, subject, list_ids, html or plain_text, preheader, sender, reply, segments, tag_ids, exclusions, frequency_cap, pause_rules, rules). Creates a draft by default; `is_publish: true` or a `scheduled_at` publishes it, so those calls return a preview first and need `confirm: true` | All plans |
 | Campaign name | Internal name | Label shown in the campaign list, not to recipients | TOOL | `create_campaign.name`, `update_campaign` | All plans |
 | Subject line | Subject | Email subject | TOOL | `create_campaign.subject` | All plans |
 | Preview text | Preheader, pre-header | Snippet after the subject in the inbox, max 150 chars | TOOL | `create_campaign.email_preheader` | All plans |
@@ -78,7 +78,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | AI subject line generator | Cloudline AI, CloudLine, AI subject | Prompt-based subject suggestions, 11 languages | PANEL | Wizard > Creative > AI subject; no API | All plans |
 | Brand kit | Brand profile, brand identity, apply brand | Logo, colours, fonts, footer applied to designs, DOI, unsubscribe and forms | PANEL | Settings > Account > Brand Kit; Builder > Apply brand | All plans |
 | AMP email | AMP, interactive email | AMP version with HTML fallback; requires a one-time access request | PANEL | Wizard > Creative > Request AMP access; API: `send_transactional_email` version 2.0 for transactional only | All plans (access request) |
-| View in browser link | Web version | Adds a browser-view link | WRAP | API `Update Campaign` field `viewin_browser`; panel: Wizard > Creative | All plans |
+| View in browser link | Web version | Adds a browser-view link | TOOL | `update_campaign.viewin_browser` on a draft; panel: Wizard > Creative | All plans |
 | Legal disclaimer / footer | Footer, physical address | Footer compliance text | PANEL | Wizard > Creative | All plans |
 | Preference center link | Manage preferences | Link to the hosted preference page | PANEL | Wizard > Creative; Settings > Preference Center | All plans |
 | Campaign tag | Campaign tags, campaign label | Label on a campaign, filterable in reports, segments and automation | TOOL | `create_campaign.tag_ids`; tag CRUD in Settings > Campaign tag | All plans |
@@ -93,12 +93,12 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
 | Send to | Recipients, audience selection, target, "sent to options" | Lists, segments and tags the campaign goes to | TOOL | `create_campaign.list_ids`, `segments`; add or remove lists on a draft with `add_lists_to_campaign` / `remove_lists_from_campaign` (campaign_id, list_ids; merged with the current lists) | All plans |
-| Add a list to a draft | List addition, add more recipients, remove a list | Extend or trim recipients of an existing draft | TOOL | `add_lists_to_campaign` (campaign_id, list_ids, dry_run) keeps the current lists and de-duplicates; `remove_lists_from_campaign` is the reverse; both refuse non-drafts. `update_campaign.list_ids` REPLACES the full set | All plans |
-| Exclude | Do not send to, exclusions, suppress list from send | Remove lists, segments or tags from the recipients | TOOL | `create_campaign.exclude_list_ids`, `exclude_segments`, `exclude_tag_ids` | All plans |
+| Add a list to a draft | List addition, add more recipients, remove a list | Extend or trim recipients of an existing draft | TOOL | `add_lists_to_campaign` / `remove_lists_from_campaign` (campaign_id, list_ids, dry_run): reads the draft's current lists and keeps them. Works on Draft and Duplicate campaigns that send to lists only; a campaign that sends to a segment is refused, because a list update clears the segment, so change those in the panel (Choose contacts) | All plans |
+| Exclude | Do not send to, exclusions, suppress list from send | Remove lists, segments or tags from the recipients | TOOL (at creation) | `create_campaign.exclude_list_ids`, `exclude_segments`, `exclude_tag_ids`; on an existing draft change exclusions in the panel (Choose contacts), the update API does not accept them | All plans |
 | Custom conditions for audience | Custom filter at send time | Ad-hoc conditions in Choose contacts | PANEL | Wizard > Choose contacts > Custom conditions | All plans |
 | Estimated contacts | Recipient estimate, target summary, campaign reach | Deduplicated count after exclusions | PANEL | Wizard > Choose contacts > Target summary; `get_list_details` gives per-list counts only | All plans |
 | Sending limit | First N / last N, send order, rules | Cap the send at N contacts taken first or last | TOOL | `create_campaign.rules` (limit, contacts_order first or last); on a draft `update_campaign.rules`; panel: Choose contacts > Additional settings | All plans |
-| Frequency capping | Frequency cap, skip recently emailed, mailing frequency | Skip contacts emailed within the account window | TOOL | `create_campaign.frequency_cap`; account window in Settings > Preferences | All plans |
+| Frequency capping | Frequency cap, skip recently emailed, mailing frequency | Skip contacts emailed within the account window | TOOL (at creation) | `create_campaign.frequency_cap`; on an existing draft use the panel; account window in Settings > Preferences | All plans |
 | Pause rules | Smart test rule, pause limit, pause percentage, wait time, send to 1 to 50% first | Send a slice, pause, continue only if open or click rate passes | TOOL | `create_campaign.pause_rules` (pause_limit 1-50, wait_time minutes, pause_criteria open or click, pause_condition, pause_target); on a draft `update_campaign.pause_rules`; panel: Schedule > rules | All plans |
 | Send a test email | Test mail, proof | Send the draft to chosen addresses | TOOL | `send_test_email` (campaign_id, recipients) | All plans |
 | Test email groups | Saved groups | Reusable test recipient lists | TOOL (list); PANEL (create, edit) | `list_testmail_groups` (search), then pass the addresses to `send_test_email`; panel: Test mail modal > Saved groups | All plans |
@@ -122,7 +122,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Pause campaign | Hold | Pause a sending campaign | PANEL (no API) | Campaigns > row actions > Pause | All plans |
 | Resume campaign | Continue | Resume a paused campaign | PANEL (no API) | Campaigns > row actions > Resume | All plans |
 | Abort campaign | Cancel, stop | Stop permanently; status Aborted | PANEL (no API) | Campaigns > row actions > Abort | All plans |
-| Reschedule | Change send time | Edit the scheduled date; pause first if sending | WRAP | API `Update Campaign.scheduled_at` on a draft or paused campaign; panel: row actions | All plans |
+| Reschedule | Change send time | Set or change the send time of a draft | TOOL, confirm first | `update_campaign.scheduled_at`: setting a time publishes the campaign, so the first call returns a preview and only `confirm: true` applies it; a campaign already sending must be paused in the panel first | All plans |
 | Duplicate campaign | Copy, clone | Copy a campaign to a new draft | PANEL (no API) | Campaigns > row actions > Duplicate | All plans |
 | Delete campaign | Remove | Delete a draft or old campaign | PANEL (no API) | Campaigns > row actions > Delete | All plans |
 | Campaign status | Draft, Scheduled, Queued, Sending, Paused, Aborted, Finished, Rescheduled, Failed | Lifecycle state | INFO | `list_campaigns`, `get_campaign` | All plans |
@@ -182,7 +182,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Export audience | Export contacts, download list | Emailed, expiring download link | PANEL | Audience > Contacts or Lists > Export | All plans |
 | Contact details | Contact profile, activity log | Fields, tags, lists and event timeline for one contact | TOOL (fields); PANEL (timeline) | `get_contact`; Audience > Contacts > contact | All plans |
 | Contact status | Active, Unverified, Unsubscribed, Bounced, Spam complaint, Suppressed | Sendability state | INFO | `get_contact`, `list_contacts` | All plans |
-| Unsubscribe / resubscribe | Opt out, opt in again | Change a contact's status | WRAP | API `Update Contact` status; panel: Contacts > bulk actions | All plans |
+| Unsubscribe / resubscribe | Opt out, opt in again, change contact status | Change whether Marketing Platform campaigns can reach a contact | TOOL, confirm first | `update_contact` with `fields.contact_type` (active, unsubscribe, suppressed, bounce, abuse, spam complaints): the first call returns a preview, `confirm: true` applies it; bulk changes: panel, Audience > Contacts > select | All plans |
 | Bulk actions | Cleanup, bulk delete, bulk tag, move list, bulk unsubscribe | Mass changes from the contact grid | PANEL | Audience > Contacts > select > Actions | All plans |
 | Delete contact | Remove subscriber | Delete one contact; irreversible | TOOL, double confirm | `delete_contact` (contact_id) | All plans |
 | Double opt-in | DOI, confirmed opt-in, confirmation email | Contact confirms by email before becoming active | PANEL | Audience > Lists > list > DOI; Import; Webform settings | All plans (watermark on Free) |
@@ -193,7 +193,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Duplicate contacts | Same contact in multiple lists, allow duplicates | Policy for a contact in several lists | INFO | Settings > Preferences | All plans |
 | Open tracking consent | Consent, lawful basis, when consent unknown | Whether opens are tracked for a contact | PANEL | Settings > Preferences; Import | All plans |
 | Audience summary | Contact summary | Cross-list totals, engagement and verification | PANEL | Audience > Summary | All plans |
-| Suppression list (marketing) | Suppressed contacts, global suppression, do-not-mail | Addresses never mailed; there is no dedicated marketing page, contacts are imported with status Suppressed, Unsubscribed, Bounced or Spam | TOOL (scoped suppression tools); PANEL (import) | `list_suppressions`, `add_suppressions` scope global or marketing, `reactivate_suppression`; Audience > Add Contacts > Contact type | All plans |
+| Suppression list (marketing) | Suppressed contacts, do-not-mail for campaigns | Stop Marketing Platform campaigns reaching an address | TOOL, confirm first | `update_contact` with `fields.contact_type: suppressed` or `unsubscribe` (preview, then `confirm: true`); in bulk, import with Contact type Suppressed in the panel. `add_suppressions` does NOT affect Marketing Platform campaigns: it is the API Platform list | All plans |
 | Preference center | Subscription preferences, manage preferences | Hosted page where contacts choose lists | PANEL | Settings > Account > Preference Center | All plans |
 | Unsubscribe page | Unsub page, unsubscribe link, departure survey | Branded unsubscribe and success page | PANEL | Settings > Account > Unsubscribe Page | All plans |
 
@@ -281,9 +281,9 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
-| Webhook | Callback, event notification, HTTP push | POST on events (marketing, transactional, Email API types) | TOOL | `list_webhooks`, `get_webhook`, `create_webhook` (name, url, events), `update_webhook`, `delete_webhook`, `toggle_webhook` | All plans |
+| Webhook | Callback, event notification, HTTP push | POST on Marketing Platform events (open, click, unsubscribe, bounce...) | TOOL | `list_webhooks`, `get_webhook`, `create_webhook` (name, url, events), `update_webhook` (name, url, events; unchanged fields are kept), `delete_webhook`, `toggle_webhook`, `test_webhook`. Marketing webhooks only: transactional and Email API webhooks are in the panel | All plans |
 | Test webhook | Fire test event | Send a sample payload | TOOL | `test_webhook` (webhook_id, dry_run); sends a real request to the customer's URL | All plans |
-| Webhook signing | Payload signing, HMAC | Signature header on deliveries | PANEL | Transactional > Settings > Payload signing | API plan |
+| Webhook signing | Payload signing, HMAC, signing secret | Signature header on webhook deliveries | PANEL | Account > Webhooks (marketing) or Transactional > Settings > Payload signing; not available through the connector | All plans |
 | Zapier / Make / Pabbly / Integrately / Albato / KonnectzIT | Automation platforms, no-code integration | Connect Mailercloud to other apps | PANEL | Settings > Plugins; help: Zapier integration | All plans |
 | HubSpot / Intercom / Salesforce / Pipedrive | CRM sync | Contact sync | PANEL | Settings > Plugins | All plans |
 | Shopify / WooCommerce / Magento / BigCommerce | E-commerce integration | Store customer sync | PANEL | Settings > Plugins | All plans |
@@ -298,19 +298,19 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
 | Send transactional email | Email API send, API email, triggered email | One-to-one application email | TOOL, confirm first | `send_transactional_email` (from, from_name, subject, to, cc, bcc, text, html, amp_html, reply_to, attachments, version 1.0 or 2.0): first call without `confirm` returns a preview; send with `confirm: true` only after the user agrees | API plan |
-| Personalized send | Send Personalized Email, mail merge, bulk send API | One call, many recipients with merge data | TOOL | `send_personalized_email` (from, subject, to with per-recipient merge_vars object, html or text; combined merge_vars at most 100 KB); two-step `confirm` like `send_transactional_email` | API Pro+ |
+| Personalized send | Send Personalized Email, mail merge, bulk send API | One call, many recipients with merge data | TOOL | `send_personalized_email` (from, subject, to with per-recipient merge_vars object, html or text; combined merge_vars at most 100 KB); two-step `confirm` like `send_transactional_email` | API plan |
 | SMTP relay | SMTP credentials, SMTP password, port | Send via SMTP instead of REST | PANEL | Transactional > Connection Guide | API plan |
 | Connection guide | Setup, credentials, API key (transactional) | Credentials and test send | PANEL | Transactional > Connection Guide | API plan |
 | Account approval | Request approval, account review | Review gate before sending | PANEL | Transactional > Request approval | API plan |
 | Email Review API | Pre-send review, content review | Checks links, blacklists, AMP errors, size for transactional content | WRAP | Email Review API (transactional only); help: "Email Review API help guide" | API plan |
 | Activity log | Activities, email logs, message status, SMTP response | Per-message delivery status with preview | PANEL | Transactional > Activities | API plan (retention 7/30 days by plan) |
 | Content storage | Store content | Keep message bodies for preview | PANEL | Transactional > Settings | API plan |
-| Suppression list (transactional) | Suppressed recipients, blocked addresses | Addresses rejected at send; reasons hard bounce, spam complaint, manual; scopes global, marketing, transactional | TOOL | `list_suppressions`, `add_suppressions`, `reactivate_suppression` (spam-complaint entries cannot be reactivated) | API plan |
-| Transactional webhooks | Event callbacks, delivery events | Delivery, open, click, bounce events | TOOL | Webhook tools with transactional type | API plan |
+| Suppression list (API Platform) | Suppressed recipients, blocked addresses, Email API suppression | Addresses rejected by the Email API and SMTP relay; reasons hard bounce, spam complaint, manual. Scope `global` = all API Platform mail, `marketing` = promotional Email API messages (campaignType PROMOTIONAL), `transactional` = transactional messages. It never affects Marketing Platform campaigns | TOOL | `list_suppressions`, `add_suppressions` (dry_run first), `reactivate_suppression` (spam-complaint entries cannot be reactivated) | API plan |
+| Transactional webhooks | Event callbacks, delivery events, Email API webhooks | Delivery, open, click, bounce events for API Platform mail, incl. custom data | PANEL | Transactional > Webhooks; the connector's webhook tools manage Marketing Platform webhooks only | API plan |
 | Custom data | Metadata, custom fields on a message, X-MC-Custom | Sender-supplied data on a transactional message, returned in webhooks and the activity log | INFO | Email API reference at apidoc.mailercloud.com | API plan |
 | IP allowlist | IP whitelist | Restrict API and SMTP use to listed IPs | PANEL | Transactional > Settings > IP Allowlist | API plan |
 | Open tracking (transactional) | Per-domain tracking | Track opens on transactional mail | PANEL | Transactional > Settings | API plan |
-| Inbox Tracker (API) | Inbox rate, placement for API mail | Seed-based placement for transactional streams | TOOL (read) | `get_inbox_tracking`; API `List Inbox-Tracking Campaigns` | Add-on, API Pro+ |
+| Inbox Tracker (API) | Inbox rate, placement for API mail | Seed-based placement for Email API streams | PANEL | Transactional > Inbox tracker. `get_inbox_tracking` covers Marketing Platform campaigns only | Add-on |
 | Usage | Quota, volume, emails used | Consumption against the API plan | PANEL | Transactional > Usage | API plan |
 | Dedicated IP (API) | Own IP for API mail | Private IP | UPGRADE | Add-on; API Pro and Platform only | Add-on |
 | Inbound parsing | Inbound email, receive email | Not yet available | INFO | Pricing page says "coming soon" | n/a |
@@ -320,7 +320,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
 | Quick verify | Single email verification | Up to 50 pasted addresses | WRAP | Verifier API `Verify Emails`; panel: Email Verifier > Single | Credits |
-| Bulk verify | List verification, upload file | CSV/XLS/XLSX up to 100 MB | WRAP | Verifier API bulk file endpoints; panel: Email Verifier > List Verification | Credits |
+| Bulk verify | List verification, upload file | Verify a whole file of addresses | PANEL | Email Verifier > List Verification (the Verifier API takes CSV/TXT up to 10 MB); not yet available through the connector | Credits |
 | Results | Deliverable, invalid, risky, unknown, safe to send, delivery score 0 to 100 | Verification outcome per address | INFO | Download results in the panel | Credits |
 | Credits | Verifier credits, top-up | One credit per address; packs never expire; 100 free for marketing subscribers | UPGRADE | Email Verifier > Pricing | Credits from $5 per 1K |
 | Verifier API key | Verifier API | Separate keys for the verifier | PANEL | Email Verifier > API Keys | Credits |
@@ -333,7 +333,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Premium plan | Paid plan, Pro | From $10 per month for 5,000 contacts; unlimited emails (fair use), higher contact limits, priority chat support | UPGRADE | Settings > Billing & Usage > Change plan | Premium |
 | Enterprise plan | Custom plan, request a quote | Custom contacts, unlimited automations, SAML SSO, account manager | UPGRADE | Settings > Billing & Usage > Request a quote | Enterprise |
 | Email API plans | Basic, Pro, Platform | $10, $100, $450 per month; 50K, 500K, 2.5M emails; 14-day trial | INFO | Transactional > Change plan | API plan |
-| Add-ons | Power-ups | Dedicated IP $50 per IP per month; Inbox Tracker $120 per month; Email Verification $110; Email Marketing as a Service $350 per month | UPGRADE | Settings > Billing & Usage > Add-ons | Add-on |
+| Add-ons | Power-ups | Dedicated IP $50 per IP per month; Inbox Tracker $120 per month; Email Marketing as a Service $350 per month | UPGRADE | Settings > Billing & Usage > Add-ons | Add-on |
 | Email Marketing as a Service | EMaaS, managed service, done-for-you | Mailercloud team runs campaigns for the client | INFO | Help: "Email Marketing as a Service" | Add-on |
 | Change plan | Upgrade, downgrade, switch plan, annual billing | Stripe-hosted checkout or portal; 30% off annual | PANEL (never take payment in chat) | Settings > Billing & Usage > Change plan | All plans |
 | Reduce contacts | Fit a plan | Lower contact count before downgrade | PANEL | Change plan > Reduce contacts | All plans |
@@ -341,7 +341,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Payment methods | Cards, saved card | Managed in the Stripe portal | PANEL | Settings > Payment Methods | Premium |
 | Invoices | Billing history, receipts | Download invoices | PANEL | Settings > Invoices | Premium |
 | Cancel / resume subscription | Stop plan, restart subscription | Stripe Customer Portal | PANEL | Settings > Billing & Usage > Manage subscription | Premium |
-| Usage and limits | Contacts used, emails sent this month, quota | Consumption against the plan | TOOL | `get_account_overview` | All plans |
+| Usage and limits | Contacts used, emails sent this month, quota | Consumption against the plan | TOOL (contacts); PANEL (emails, quota) | `get_account_overview` gives plan and contact counts; emails sent, API quota and add-on status: Settings > Billing & Usage | All plans |
 | Fair use | Unlimited emails | Unlimited on Premium subject to fair use | INFO | Help: "Plan and pricing FAQs" | Premium |
 
 ## 16. Analysis-only terms the assistant should recognise

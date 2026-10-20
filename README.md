@@ -10,7 +10,7 @@ the box, not just the raw tools.
 ## What's inside
 | Piece | What it adds |
 |-------|--------------|
-| `.mcp.json` | Connects the Mailercloud MCP server (`https://mcp.mailercloud.com/mcp`, 50+ tools, 4 guided prompts) |
+| `.mcp.json` | Connects the Mailercloud MCP server (`https://mcp.mailercloud.com/mcp`, 70+ tools, 4 guided prompts) |
 | `/mailercloud:campaign-audit` | Audit a draft campaign before sending |
 | `/mailercloud:analyze-campaigns` | Analyze recent campaigns + action plan |
 | `/mailercloud:clean-list` | Clean a list safely: preview suppressions, segment non-openers, offer verification |

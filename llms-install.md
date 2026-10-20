@@ -48,5 +48,5 @@ Call the `list_contact_lists` tool. If it returns the user's contact lists, setu
 
 ## Safe use
 
-- Before `schedule_campaign` or `send_transactional_email`, show the campaign name, list, sender and send time, and ask the user to confirm.
+- `schedule_campaign`, `send_transactional_email` and `send_personalized_email` are two-step: the first call returns a preview and sends nothing. Show it (campaign or subject, recipients, sender, send time) and call again with `confirm: true` only after the user agrees.
 - Never delete contacts, lists or webhooks without explicit confirmation.
