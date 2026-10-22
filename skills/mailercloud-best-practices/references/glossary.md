@@ -149,7 +149,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Health check | Portfolio view, how are my campaigns doing | Quick grade across recent campaigns | TOOL | `campaign_health_dashboard` | All plans |
 | Engagement funnel | Sent to delivered to opened to clicked | Drop-off at each stage | TOOL | `engagement_funnel` | All plans |
 | Best practices | Recommendations, what should I improve | Data-driven recommendations from the account's own history | TOOL | `get_best_practices` | All plans |
-| Open rate / click rate / CTR | Opens, clicks | Standard engagement metrics | INFO | From the tools above | All plans |
+| Open rate / click rate / CTR | Opens, clicks, click-to-open | Unique opens and unique clicks over delivered (sent minus hard bounces); click-to-open is unique clicks over unique opens. Campaigns with under 100 delivered are not graded | INFO | From the tools above | All plans |
 | Unique vs total opens | Unique opens | Deduplicated per contact vs all events | INFO | `get_campaign` | All plans |
 | Domain report | Deliverability by provider, Gmail vs Outlook | Per-recipient-domain performance | TOOL | `get_campaign_domain_report` | All plans |
 | Opens list / clicks list / unsubscribes list | Who opened, who clicked, recipient activity | Per-contact engagement lists | TOOL | `get_campaign_opens`, `get_campaign_clicks`, `get_campaign_unsubscribes` (campaign_id, page, limit 1-100, date_from, date_to); unsubscribes include the reason (Abuse = reported spam) | All plans |
