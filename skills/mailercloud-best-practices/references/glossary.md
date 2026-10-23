@@ -4,7 +4,11 @@
 
 Source of truth for how an AI assistant (Claude, ChatGPT, Cursor, Gemini, Claude Code plugin) should interpret a Mailercloud term and what it should do about it. Rendered into: the MCP server `Instructions` string, the `mailercloud-best-practices` plugin skill, and the help-center article "Connect Mailercloud to AI assistants".
 
-Version 0.4, 2026-10-19. Owner: Product. Built from the Mailercloud panel, the help center, the pricing pages, the public API reference at apidoc.mailercloud.com and the live connector tools; plan gating and feature availability confirmed by product.
+Version 0.5, 2026-10-23. Owner: Product. Built from the Mailercloud panel, the help center, the pricing pages, the public API reference at apidoc.mailercloud.com and the live connector tools; plan gating and feature availability confirmed by product.
+
+## When the user asks what you can do
+
+Call `get_account_overview` and answer from its "What you can do with Mailercloud here" section, not from the tool list. Cover every product, including those with few or no tools here: Marketing Platform, API Platform (transactional email), Email Verifier, and the add-ons (Inbox Tracker, Dedicated IP, Email Marketing as a Service). For each, say what works from chat and what is done in the app, with the place in the app. The `getting_started` prompt does the same and then offers first tasks.
 
 ## How to read a row
 
@@ -26,7 +30,7 @@ Behaviour rules set by product on 2026-10-16:
 
 Behaviour rules added 2026-10-19 (connector guardrails):
 
-- **Sends and deletes are two-step.** `schedule_campaign`, `send_transactional_email` and `send_personalized_email` send nothing on the first call, and `delete_tag`, `delete_custom_field` and `remove_tag_from_contact` delete nothing: without `confirm: true` they return a preview (campaign or message, sender, subject, approximate recipients, send time). Show the preview, get an explicit yes, and only then call again with `confirm: true`. Never set `confirm: true` on the first call.
+- **Sends and deletes are two-step.** `schedule_campaign`, `send_transactional_email` and `send_personalized_email` send nothing on the first call, and `delete_tag`, `delete_custom_field`, `remove_tag_from_contact`, `delete_list`, `delete_contact`, `delete_webhook`, `add_suppressions`, `update_segment` and `toggle_webhook` (when pausing) change nothing: without `confirm: true` they return a preview (campaign or message, sender, subject, approximate recipients, send time). Show the preview, get an explicit yes, and only then call again with `confirm: true`. Never set `confirm: true` on the first call.
 - **Every write tool supports `dry_run: true`** (`report_unsupported_task` excepted: it only logs). It validates the input and returns what would change without changing anything. Use it to preview creates, updates, deletes and suppressions before running them for real.
 - **Report every hand-off.** After any PANEL, WRAP or not-offered hand-off, or a term this glossary does not cover, call `report_unsupported_task` once (request in the user's words without contact data, the term, the outcome, the panel path you gave). It changes nothing in the account.
 - Tools never take an API key as input. Authentication is the connector sign-in; never ask the user to paste a key into the chat.
@@ -184,7 +188,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 | Contact status | Active, Unverified, Unsubscribed, Bounced, Spam complaint, Suppressed | Sendability state | INFO | `get_contact`, `list_contacts` | All plans |
 | Unsubscribe / resubscribe | Opt out, opt in again, change contact status | Change whether Marketing Platform campaigns can reach a contact | TOOL, confirm first | `update_contact` with `fields.contact_type` (active, unsubscribe, suppressed, bounce, abuse, spam complaints): the first call returns a preview, `confirm: true` applies it; bulk changes: panel, Audience > Contacts > select | All plans |
 | Bulk actions | Cleanup, bulk delete, bulk tag, move list, bulk unsubscribe | Mass changes from the contact grid | PANEL | Audience > Contacts > select > Actions | All plans |
-| Delete contact | Remove subscriber | Delete one contact; irreversible | TOOL, double confirm | `delete_contact` (contact_id) | All plans |
+| Delete contact | Remove subscriber | Delete one contact; irreversible | TOOL, confirm first | `delete_contact` (contact_id): preview first, then `confirm: true` | All plans |
 | Double opt-in | DOI, confirmed opt-in, confirmation email | Contact confirms by email before becoming active | PANEL | Audience > Lists > list > DOI; Import; Webform settings | All plans (watermark on Free) |
 | Unknown contacts | Unverified contacts | Contacts without consent or verification | INFO | Help: "Unknown contacts" | All plans |
 | Contact rating | Contact score, star rating, lead score, engagement rating | Engagement rating per contact; owner-controlled scoring | INFO | Visible in `get_contact` where returned; Audience > Contacts column | All plans |
@@ -281,7 +285,7 @@ Plan column: **Free**, **Premium** (paid marketing plan), **Enterprise**, **Add-
 
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
-| Webhook | Callback, event notification, HTTP push | POST on Marketing Platform events (open, click, unsubscribe, bounce...) | TOOL | `list_webhooks`, `get_webhook`, `create_webhook` (name, url, events), `update_webhook` (name, url, events; unchanged fields are kept), `delete_webhook`, `toggle_webhook`, `test_webhook`. Marketing webhooks only: transactional and Email API webhooks are in the panel | All plans |
+| Webhook | Callback, event notification, HTTP push | POST on Marketing Platform events: campaign_sent, campaign_opened, campaign_clicked, unsubscribe, campaign_error, spam, hard_bounce | TOOL | `list_webhooks`, `get_webhook`, `create_webhook` (name, url, events; only these event names are accepted), `update_webhook` (name, url, events; unchanged fields are kept), `delete_webhook`, `toggle_webhook`, `test_webhook`. Marketing webhooks only: transactional and Email API webhooks are in the panel | All plans |
 | Test webhook | Fire test event | Send a sample payload | TOOL | `test_webhook` (webhook_id, dry_run); sends a real request to the customer's URL | All plans |
 | Webhook signing | Payload signing, HMAC, signing secret | Signature header on webhook deliveries | PANEL | Account > Webhooks (marketing) or Transactional > Settings > Payload signing; not available through the connector | All plans |
 | Zapier / Make / Pabbly / Integrately / Albato / KonnectzIT | Automation platforms, no-code integration | Connect Mailercloud to other apps | PANEL | Settings > Plugins; help: Zapier integration | All plans |
@@ -363,6 +367,7 @@ Clients that support MCP prompts show these as ready-made starting points. Each 
 
 | Term | Also called | Meaning | Outcome | Action | Plan |
 | --- | --- | --- | --- | --- | --- |
+| Getting started | What can you do, what can Mailercloud do, help me start | Overview of every product and add-on, what works from chat and what is done in the app, then first tasks | TOOL | Prompt `getting_started`: `get_account_overview` (its product overview section), then three first tasks for the product the user picks | All plans |
 | Plan a campaign | Campaign plan, help me send a campaign | Audience, content, draft, audit and test send, ready to schedule | TOOL | Prompt `plan_campaign` (goal, audience): `list_contact_lists`, `list_segments`, `create_campaign` as draft, `audit_campaign_draft`, `send_test_email` with `dry_run: true` first, then `schedule_campaign` two-step | All plans |
 | Audit a draft | Check my draft, pre-send review | Prioritised fix list for one draft | TOOL | Prompt `audit_draft` (campaign_id): `get_campaign`, `audit_campaign_draft`, `list_senders` | All plans |
 | Monthly review | Monthly report, how did this month go | Recent performance with three actions | TOOL | Prompt `monthly_review` (count, default 10): `analyze_latest_campaigns`, `campaign_health_dashboard`, `compare_campaigns`, `get_best_practices` | All plans |
